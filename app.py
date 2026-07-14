@@ -14,3 +14,6 @@ def login():
 
 
     return query
+
+def logout():
+    return "Logged out"
