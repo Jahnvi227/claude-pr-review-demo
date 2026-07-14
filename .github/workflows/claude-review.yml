@@ -1,87 +1,38 @@
-name: Claude PR Review
-
-
+name: Claude Auto Review
 on:
-
   pull_request:
-
-    types:
-      - opened
-      - synchronize
-      - reopened
-
-
-
-permissions:
-
-  contents: read
-
-  pull-requests: write
-
-
+    types: [opened, synchronize]
 
 jobs:
-
-
-  claude-review:
-
-
+  review:
     runs-on: ubuntu-latest
-
-
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
 
-      - name: Checkout repository
+            Please review this pull request with a focus on:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Security implications
+            - Performance considerations
 
-        uses: actions/checkout@v4
+            Note: The PR branch is already checked out in the current working directory.
 
+            Use gh pr comment for top-level feedback.
+            Use mcp__github_inline_comment__create_inline_comment (with confirmed: true) to highlight specific code issues.
+            Only post GitHub comments - don't submit review text as messages.
 
-
-      - name: Install Claude CLI
-
-        run: |
-
-          npm install -g @anthropic-ai/claude-code
-
-
-
-      - name: Run Claude review
-
-        env:
-
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
-
-        run: |
-
-          claude \
-          -p "Review this PR and find bugs, security issues, and code quality problems." \
-          --output-format json \
-          --json-schema .github/claude-review-schema.json \
-          > claude-review.json
-
-
-
-      - name: Display Claude result
-
-        run: |
-
-          cat claude-review.json
-
-
-
-      - name: Post review comments
-
-        env:
-
-          GH_TOKEN: ${{ github.token }}
-
-          REPOSITORY: ${{ github.repository }}
-
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-
-
-        run: |
-
-          python3 scripts/post_claude_comments.py
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:),Bash(gh pr diff:),Bash(gh pr view:*)"
