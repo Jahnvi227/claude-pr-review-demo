@@ -1,0 +1,87 @@
+name: Claude PR Review
+
+
+on:
+
+  pull_request:
+
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+
+
+permissions:
+
+  contents: read
+
+  pull-requests: write
+
+
+
+jobs:
+
+
+  claude-review:
+
+
+    runs-on: ubuntu-latest
+
+
+    steps:
+
+
+      - name: Checkout repository
+
+        uses: actions/checkout@v4
+
+
+
+      - name: Install Claude CLI
+
+        run: |
+
+          npm install -g @anthropic-ai/claude-code
+
+
+
+      - name: Run Claude review
+
+        env:
+
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+
+        run: |
+
+          claude \
+          -p "Review this PR and find bugs, security issues, and code quality problems." \
+          --output-format json \
+          --json-schema .github/claude-review-schema.json \
+          > claude-review.json
+
+
+
+      - name: Display Claude result
+
+        run: |
+
+          cat claude-review.json
+
+
+
+      - name: Post review comments
+
+        env:
+
+          GH_TOKEN: ${{ github.token }}
+
+          REPOSITORY: ${{ github.repository }}
+
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+
+        run: |
+
+          python3 scripts/post_claude_comments.py

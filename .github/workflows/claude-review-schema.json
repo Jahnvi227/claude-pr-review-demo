@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude PR Review",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "file",
+      "line",
+      "severity",
+      "finding",
+      "suggested_fix"
+    ],
+    "properties": {
+      "file": {
+        "type": "string"
+      },
+      "line": {
+        "type": "integer"
+      },
+      "severity": {
+        "type": "string",
+        "enum": [
+          "critical",
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "finding": {
+        "type": "string"
+      },
+      "suggested_fix": {
+        "type": "string"
+      }
+    }
+  }
+}
