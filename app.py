@@ -19,4 +19,4 @@ def logout():
     return "Logged out"
 
 def authenticate():
-    return "Authenticated"
+    return "authorised"
