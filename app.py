@@ -20,3 +20,6 @@ def logout():
 
 def authenticate():
     return "authorised"
+
+def get_user(username):
+    return {"name": username, "age": 30}
