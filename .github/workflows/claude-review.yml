@@ -58,7 +58,7 @@ jobs:
           claude \
           -p "Review this PR and find bugs, security issues, and code quality problems." \
           --output-format json \
-          --json-schema .github/claude-review-schema.json \
+          --json-schema "$(cat .github/claude-review-schema.json)" \
           > claude-review.json
 
 
